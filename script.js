@@ -5,8 +5,8 @@ let oddTurn = true;
 const Player = (name, symbol) => {
     const getName = () => name;
     const getSymbol = () => symbol;
-    const markBoard = (positionX, positionY) => {
-        return gameBoard.addMark(getSymbol(), positionX, positionY);
+    const markBoard = (position) => {
+        return gameBoard.addMark(getSymbol(), position);
     };
 
     return {
@@ -20,30 +20,78 @@ const Player = (name, symbol) => {
 // Game Board Module
 const gameBoard = ( () => {
 
-    // create 3x3 array
-    const arr = new Array(3);
-
-    for (let i = 0; i < 3; i++) {
-        arr[i] = new Array(3)
-    };
+    // create array for each position in tic tac toe board
+    const arr = new Array(9);
 
     const getArray = () => {
         return arr;
     };
 
     // mark the board
-    const addMark = (symbol, positionX, positionY) => { 
-        if (arr[positionY][positionX]) {
+    const addMark = (symbol, position) => { 
+        if (arr[position]) {
             return false;
         } else {
-            arr[positionY][positionX] = symbol;
+            arr[position] = symbol;
             return true;
         }
     };
 
+    const checkWin = () => {
+
+        // check rows for win condition
+        for (let row = 0; row < 3; row++) {
+            let rowSet = new Set(arr.slice(row * 3, (row + 1) * 3));
+            if (rowSet.size == 1 && !rowSet.has(undefined)) {
+                console.log(rowSet);
+                return arr[row * 3];
+            }
+        }
+
+        // check columns for win condition
+        for (let col = 0; col < 3; col++) {
+            let colSet = new Set([arr[col], arr[col + 3], arr[col + 6]]);
+
+            if (colSet.size == 1 && !colSet.has(undefined)) {
+                console.log(colSet);
+                return arr[col];
+            }
+        }
+
+        // check diagonals for win condition
+
+        let bslashSet = new Set([arr[0], arr[4], arr[8]]);
+        if (bslashSet.size == 1 && !bslashSet.has(undefined)) {
+            return arr[0];
+        } 
+
+        let fslashSet = new Set([arr[2], arr[4], arr[6]]);
+        if (fslashSet.size == 1 && !fslashSet.has(undefined)) {
+            return arr[2];
+        }
+
+        return false;
+
+    }
+
+    const isGameOver = () => {
+        if (checkWin()) {
+            console.log(`${checkWin()} wins`);
+            return true;
+        }
+
+        for (let i = 0; i < arr.length; i++) {
+            if ('undefined' == typeof arr[i]) {return false}
+        }
+
+        console.log("Game Tied");
+        return true;
+    }
+
     return {
         getArray,
-        addMark
+        addMark,
+        isGameOver
     }
 })();
 
@@ -63,21 +111,21 @@ const displayController = ( () => {
 
             for (let j = 0; j < 3; j++) {
                 let cell = document.createElement('td');
-                cell.setAttribute('positionY', i);
-                cell.setAttribute('positionX', j);
+                let position = 3 * i + j;
+                cell.setAttribute('position', position);
                 cell.classList.add('cell');
                 cell.addEventListener('click', (e) => {
                     let cell = e.target;
-                    let mark = getCurrentPlayer().markBoard(cell.getAttribute('positionX'), cell.getAttribute('positionY'));
-                    console.log(mark);
+                    let mark = getCurrentPlayer().markBoard(cell.getAttribute('position'));
                     if (mark) {
                         oddTurn = !oddTurn;
                         displayBoard();
+                        gameBoard.isGameOver();
                     }
                 });
 
-                if (gameBoard.getArray()[i][j]) {
-                    cell.appendChild(document.createTextNode(gameBoard.getArray()[i][j]));
+                if (gameBoard.getArray()[position]) {
+                    cell.appendChild(document.createTextNode(gameBoard.getArray()[position]));
                 };
 
                 row.appendChild(cell);
