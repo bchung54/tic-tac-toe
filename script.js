@@ -23,6 +23,7 @@ const gameBoard = ( () => {
     // create array for each position in tic tac toe board
     const arr = new Array(9);
 
+    // allow other modules and functions to get array
     const getArray = () => {
         return arr;
     };
@@ -37,13 +38,13 @@ const gameBoard = ( () => {
         }
     };
 
+    // check win conditions
     const checkWin = () => {
 
         // check rows for win condition
         for (let row = 0; row < 3; row++) {
             let rowSet = new Set(arr.slice(row * 3, (row + 1) * 3));
             if (rowSet.size == 1 && !rowSet.has(undefined)) {
-                console.log(rowSet);
                 return arr[row * 3];
             }
         }
@@ -53,7 +54,6 @@ const gameBoard = ( () => {
             let colSet = new Set([arr[col], arr[col + 3], arr[col + 6]]);
 
             if (colSet.size == 1 && !colSet.has(undefined)) {
-                console.log(colSet);
                 return arr[col];
             }
         }
@@ -72,8 +72,9 @@ const gameBoard = ( () => {
 
         return false;
 
-    }
+    };
 
+    // checks if game ends
     const isGameOver = () => {
         if (checkWin()) {
             console.log(`${checkWin()} wins`);
@@ -86,64 +87,64 @@ const gameBoard = ( () => {
 
         console.log("Game Tied");
         return true;
-    }
+    };
 
+    // check if cell is empty
+    const isCellEmpty = (position) => {return (arr[position] ? false : true)};
+    
     return {
         getArray,
         addMark,
-        isGameOver
+        isGameOver,
+        isCellEmpty
     }
 })();
+
+// Cell Factory Function
+const Cell = (position) => {
+    const getPosition = () => position;
+    const getSymbol = () => gameBoard.getArray()[position];
+    const addEvent = (container) => {
+        container.addEventListener('click', () => {
+            if (gameBoard.isCellEmpty(position)) {
+                getCurrentPlayer().markBoard(position);
+                oddTurn = !oddTurn;
+                displayController.displayCell(position);
+                gameBoard.isGameOver();
+            }
+        });
+    }
+
+    return {
+        getPosition,
+        getSymbol,
+        addEvent
+    }
+};
 
 // Display Controller Module
 const displayController = ( () => {
 
-    const displayBoard = () => {
-        let boardContainer = document.getElementById('board');
-        let boardTable = document.createElement('table');
+    const displayCell = (position) => {
+        let box = document.getElementById(`box-${position}`);
+        box.appendChild(document.createTextNode(gameBoard.getArray()[position]));
+    }
 
-        while (boardContainer.firstChild) {
-            boardContainer.removeChild(boardContainer.lastChild);
+    const setBoard = () => {
+        for (let i = 0; i < 9; i++) {
+            let box = document.getElementById(`box-${i}`);
+            let cell = Cell(i);
+            cell.addEvent(box);
         }
-
-        for (let i = 0; i < 3; i++) {
-            let row = document.createElement('tr');
-
-            for (let j = 0; j < 3; j++) {
-                let cell = document.createElement('td');
-                let position = 3 * i + j;
-                cell.setAttribute('position', position);
-                cell.classList.add('cell');
-                cell.addEventListener('click', (e) => {
-                    let cell = e.target;
-                    let mark = getCurrentPlayer().markBoard(cell.getAttribute('position'));
-                    if (mark) {
-                        oddTurn = !oddTurn;
-                        displayBoard();
-                        gameBoard.isGameOver();
-                    }
-                });
-
-                if (gameBoard.getArray()[position]) {
-                    cell.appendChild(document.createTextNode(gameBoard.getArray()[position]));
-                };
-
-                row.appendChild(cell);
-            }
-
-            boardTable.appendChild(row);
-        }
-
-        boardContainer.appendChild(boardTable);
-
     };
 
     return {
-        displayBoard,
+        displayCell,
+        setBoard,
         oddTurn
     }
 })();
 
 const players = new Array(Player("Player1", 'X'), Player("Player2", 'O'));
 const getCurrentPlayer = () => {return (oddTurn ? players[0] : players[1])};
-displayController.displayBoard();
+displayController.setBoard();
