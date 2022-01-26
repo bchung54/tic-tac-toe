@@ -10,7 +10,19 @@
 </head>
 <body>
     <div id="title">Tic Tac Toe</div>
+    <button id="restart-btn">RESTART</button>
     <section id="board">
+        <div id="playername-input">
+            <div id="player1form">
+                <input type="text" id="player1-input" onfocus="this.value=''" placeholder="Enter Player 1 Name">
+                <button class="playername-btn" id="player1-btn">Enter</button>
+            </div>
+            <div id="player2form">
+                <input type="text" id="player2-input" onfocus="this.value=''" placeholder="Enter Player 2 Name">
+                <button class="playername-btn" id="player2-btn">Enter</button>
+            </div>
+        </div>
+        
         <table>
             <tr>
                 <td id="box-0"></td>
@@ -30,5 +42,12 @@
         </table>
     </section>
     
+    <!-- Modal Section -->
+    <div class="bg-modal">
+        <div class="modal-content">
+            <div class="close">+</div>
+            <div class="endgame-msg"></div>
+        </div>
+    </div>
 </body>
 </html>
