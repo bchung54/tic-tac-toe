@@ -11,26 +11,28 @@
     <title>Tic Tac Toe</title>
 </head>
 <body>
-    <h1 id="title">Tic Tac Toe</h1>
-
     <!-- Start Screen -->
     <section id="start-screen">
-        <ul>
-            <li id="1p" class="start-option selected">1 PLAYER</li>
-            <li id="2p" class="start-option">2 PLAYERS</li>
-        </ul>
-        <!-- <div class="start-instruction">PRESS <em>D</em> TO CHANGE DIFFICULTY</div> -->
-        <div class="start-instruction">PRESS <em>SPACE</em> TO PLAY GAME</div>
+        <h1 id="title">Tic Tac Toe</h1>
+
+        <div class="start-text">
+            <ul>
+                <li id="1p" class="start-option selected">1 PLAYER</li>
+                <li id="2p" class="start-option">2 PLAYERS</li>
+            </ul>
+            <!-- <div class="start-instruction">PRESS <em>D</em> TO CHANGE DIFFICULTY</div> -->
+            <div class="start-instruction">PRESS <em>SPACE</em> TO PLAY GAME</div>
+        </div>
     </section>
 
     <main id="game-display">
 
         <section id="p1section" class="player-section">
             <h3 id="p1Title">Player 1</h3>
-            <div id="player1form" class="player-form">
-                <input type="text" id="player1-input" onfocus="this.value=''" placeholder="Enter Name">
-                <input type="submit" id="player1-btn"></button>
-            </div>
+            <form id="player1form" class="player-form" onsubmit="onNameSubmit(event)">
+                <input type="text" id="P1" class="name-input" onfocus="this.value=''" placeholder="Enter Name">
+                <input type="submit" class="submit-btn">
+            </form>
         </section>
         
         <section id="board">
@@ -56,10 +58,10 @@
         
         <section id="p2section" class="player-section">
             <h3 id="p2Title">Player 2</h3>
-            <div id="player2form" class="player-form">
-                <input type="text" id="player2-input" onfocus="this.value=''" placeholder="Enter Name">
-                <input type="submit" id="player2-btn"></button>
-            </div>
+            <form id="player2form" class="player-form" onsubmit="onNameSubmit(event)">
+                <input  type="text" id="P2" class="name-input" onfocus="this.value=''" placeholder="Enter Name">
+                <input type="submit" class="submit-btn">
+            </form>
         </section> 
     </main>
    

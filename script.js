@@ -5,7 +5,7 @@ let botMode = false;
 // DOM Elements
 const title = document.getElementById('title');
 const main = document.querySelector('main');
-const startScreenSection = document.getElementById('start-screen');
+const startScreenText = document.querySelector('.start-text');
 const restartButton = document.getElementById('restart-btn');
 const modalContent = document.querySelector('.modal-content');
 const bgModal = document.querySelector('.bg-modal');
@@ -205,20 +205,6 @@ const displayController = (function() {
 // Restart button event
 restartButton.addEventListener('click', () => {displayController.clearDisplay()});
 
-// Player 1 name input button event
-document.getElementById("player1-btn").addEventListener('click', () => {
-    let inputElementP1 = document.querySelector('#player1-input');
-    (inputElementP1.value ? inputElementP1.placeholder = inputElementP1.value : inputElementP1.value = "Player1");
-    players[0] = Player(inputElementP1.value, 'X');
-});
-
-// Player 2 name input button event
-document.getElementById("player2-btn").addEventListener('click', () => {
-    let inputElementP2 = document.querySelector('#player2-input');
-    (inputElementP2.value ? inputElementP2.placeholder = inputElementP2.value : inputElementP2.value = "Player2");
-    players[1] = Player(inputElementP2.value, 'O');
-});
-
 // Modal event listeners
 // Modal close event
 modalClose.addEventListener('click', () => {document.querySelector('.bg-modal').style.display = 'none'});
@@ -265,7 +251,6 @@ window.addEventListener("keydown", function(event) {
             startGame();
             break;
         default:
-            console.log(code);
             return;
     }
     
@@ -280,10 +265,29 @@ window.addEventListener("keydown", function(event) {
 // Start game function
 function startGame() {
     title.style.position = 'absolute';
-    title.style.animation = 'title 2s';
+    title.style.animation = 'title 1s';
     title.style.top = '5%';
-    startScreenSection.style.display = 'none';
-    main.style.display = 'flex';
+    startScreenText.style.display = 'none';
+    main.style.position = 'absolute';
+    main.style.top = '30%';
+    main.style.animation = 'main 2s';
+    main.style.transform = 'scale(1)';
+}
+
+// Submitting player name
+function onNameSubmit(e) {
+    e.preventDefault();
+    let userInput = e.target.elements[0];
+    (userInput.value ? userInput.placeholder = userInput.value : userInput.value = userInput.id);
+    if (userInput.id == "P1") {
+        players[0] = Player(userInput.value, 'X');
+    } else {
+        players[1] = Player(userInput.value, 'O');
+    };
+    e.target.elements[1].classList.add('submitted');
+    console.log(e.target.elements[1]);
+    console.log(userInput.value);
+    return false;
 }
 
 // Get current player function

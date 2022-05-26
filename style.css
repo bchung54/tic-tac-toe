@@ -39,16 +39,45 @@ h1 {
     display: flex;
     flex-direction: column;
     align-items: center;
-    font-size: 26px;
+    margin-top: 30vh;
+    font-size: 28px;
+}
+
+li {
+    margin-top: 8px;
+}
+
+.start-text {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
 
 em {
     font-style: italic;
     color: rgb(138, 106, 0);
+    animation: blink 1.5s infinite;
 }
 
-.selected {
-    list-style-type: square; /* turn into triangle pointer */
+.selected::marker {
+    position: relative;
+    font-size: 20px;
+    color:rgb(138, 106, 0);
+    content: "▶ ";
+    animation: blink 1s infinite;
+}
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+    
 }
 
 .start-instruction {
@@ -98,6 +127,7 @@ input {
     padding: 0 12px;
     border-style: hidden;
     text-align: center;
+    background-color: rgba(255, 230, 0, 0);
     color: steelblue;
     font-family: Atari, Arial, Helvetica, sans-serif;
     font-size: 20px;
@@ -108,13 +138,15 @@ input:hover {
     border-color: red;
 }
 
-input[submit] {
+.submit-btn {
+    background-color: rgb(255, 0, 0);
     opacity: 0.4;
     font-size: 16px;
 }
 
-input[submit]:hover {
-    opacity: 1;
+.submit-btn:hover {
+    color:white;
+    opacity: 0.7;
 }
 
 /* Modal */
@@ -162,20 +194,28 @@ input[submit]:hover {
 }
 
 main {
-    display: none;
+    display: flex;
     width: 75vw;
     justify-content: space-evenly;
     padding: 36px;
+    transform: scale(0);
+}
+
+@keyframes main {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
 }
 
 @keyframes title {
     from {
         top: 40%;
-        display: none;
     }
     to {
         top: 5%;
-        display: flex;
     }
 }
 
@@ -189,6 +229,7 @@ main {
 
 
 ::placeholder {
+    opacity: 0.7;
     font-family: Atari, Arial, Arial, Helvetica, sans-serif;
 }
 
@@ -197,6 +238,7 @@ main {
 }
 
 h3 {
+    border-bottom: 4px solid steelblue;
     padding: 12px;
 }
 
@@ -204,4 +246,8 @@ h3 {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+.submitted {
+    display: none;
 }
