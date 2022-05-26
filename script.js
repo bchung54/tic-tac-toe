@@ -1,11 +1,24 @@
 // Boolean: keeps track of whose turn
 let oddTurn = true;
+let botMode = false;
 
+// DOM Elements
+const title = document.getElementById('title');
+const main = document.querySelector('main');
+const startScreenSection = document.getElementById('start-screen');
+const restartButton = document.getElementById('restart-btn');
+const modalContent = document.querySelector('.modal-content');
+const bgModal = document.querySelector('.bg-modal');
+const modalClose = document.querySelector('.close');
+
+// Factory functions
+//
 // Player Factory Function
 const Player = (name, symbol) => {
     const getName = () => name;
     const getSymbol = () => symbol;
     const markBoard = (position) => {
+        console.log(gameBoard.getArray()); 
         return gameBoard.addMark(getSymbol(), position);
     };
 
@@ -16,10 +29,44 @@ const Player = (name, symbol) => {
     }
 };
 
+// Player array
+const players = new Array(Player("Player1", 'X'), Player("Player2", 'O'));
 
+// Cell Factory Function
+const Cell = (position) => {
+    const getPosition = () => position;
+    const getSymbol = () => gameBoard.getArray()[position];
+    const addEvent = (container) => {
+        container.addEventListener('click', () => {
+            if (gameBoard.isCellEmpty(position)) {
+                getCurrentPlayer().markBoard(position);
+                oddTurn = !oddTurn;
+                displayController.displayCell(position);
+                gameBoard.isGameOver();
+                if (botMode) {
+                    if(gameBoard.isGameOver()) {return}; 
+                    let randomEmptyCell = gameBoard.nextEmptyCell();
+                    console.log(randomEmptyCell);
+                    bot.takeTurn(randomEmptyCell);
+                    oddTurn = !oddTurn;
+                    displayController.displayCell(randomEmptyCell);
+                    gameBoard.isGameOver();
+                }
+            }
+        });
+    }
 
+    return {
+        getPosition,
+        getSymbol,
+        addEvent
+    }
+};
+
+// Modules
+//
 // Game Board Module
-const gameBoard = ( () => {
+const gameBoard = (function() {
 
     // create array for each position in tic tac toe board
     let arr = new Array(9);
@@ -42,6 +89,14 @@ const gameBoard = ( () => {
             arr[position] = symbol;
             return true;
         }
+    };
+
+    const nextEmptyCell = () => {
+        do {
+            random = Math.floor(Math.random() * 9);
+        }
+        while(!gameBoard.isCellEmpty(random));
+        return random;
     };
 
     // check win conditions
@@ -108,36 +163,15 @@ const gameBoard = ( () => {
     return {
         getArray,
         clearBoard,
+        nextEmptyCell,
         addMark,
         isGameOver,
         isCellEmpty
     }
 })();
 
-// Cell Factory Function
-const Cell = (position) => {
-    const getPosition = () => position;
-    const getSymbol = () => gameBoard.getArray()[position];
-    const addEvent = (container) => {
-        container.addEventListener('click', () => {
-            if (gameBoard.isCellEmpty(position)) {
-                getCurrentPlayer().markBoard(position);
-                oddTurn = !oddTurn;
-                displayController.displayCell(position);
-                gameBoard.isGameOver();
-            }
-        });
-    }
-
-    return {
-        getPosition,
-        getSymbol,
-        addEvent
-    }
-};
-
 // Display Controller Module
-const displayController = ( () => {
+const displayController = (function() {
 
     const displayCell = (position) => {
         let box = document.getElementById(`box-${position}`);
@@ -166,43 +200,108 @@ const displayController = ( () => {
     }
 })();
 
+// Event Listeners
+//
+// Restart button event
+restartButton.addEventListener('click', () => {displayController.clearDisplay()});
 
-document.getElementById("restart-btn").addEventListener('click', () => {
-    displayController.clearDisplay();
-});
-
+// Player 1 name input button event
 document.getElementById("player1-btn").addEventListener('click', () => {
     let inputElementP1 = document.querySelector('#player1-input');
     (inputElementP1.value ? inputElementP1.placeholder = inputElementP1.value : inputElementP1.value = "Player1");
     players[0] = Player(inputElementP1.value, 'X');
 });
 
+// Player 2 name input button event
 document.getElementById("player2-btn").addEventListener('click', () => {
     let inputElementP2 = document.querySelector('#player2-input');
     (inputElementP2.value ? inputElementP2.placeholder = inputElementP2.value : inputElementP2.value = "Player2");
     players[1] = Player(inputElementP2.value, 'O');
 });
 
-document.querySelector('.close').addEventListener('click', () => {
-    document.querySelector('.bg-modal').style.display = 'none';
-});
+// Modal event listeners
+// Modal close event
+modalClose.addEventListener('click', () => {document.querySelector('.bg-modal').style.display = 'none'});
+modalClose.addEventListener('click', () => {displayController.clearDisplay()});
 
-document.querySelector('.close').addEventListener('click', () => {
-    displayController.clearDisplay();
-});
-
-document.querySelector('.bg-modal').addEventListener('click', () => {
+// Modal background event
+bgModal.addEventListener('click', () => {
     document.querySelector('.bg-modal').style.display = 'none';
     displayController.clearDisplay();
 });
 
-document.querySelector('.modal-content').addEventListener('click', (e) => {
+// Modal content event
+modalContent.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     e.stopImmediatePropagation();
     return false;
 });
 
-const players = new Array(Player("Player1", 'X'), Player("Player2", 'O'));
+// Start screen event listener
+window.addEventListener("keydown", function(event) {
+    if (event.defaultPrevented) {
+        return; // Do nothing if the event was already processed
+    };
+    
+    const code = event.code;
+    const currSelection = document.querySelector('.selected');
+
+    switch (code) {
+        case 'ArrowDown':
+            if (currSelection.textContent.includes('1')) {
+                currSelection.classList.remove('selected');
+                document.getElementById('2p').classList.add('selected');
+            }
+            break;
+        case 'ArrowUp':
+            if (currSelection.textContent.includes('2')) {
+                currSelection.classList.remove('selected');
+                document.getElementById('1p').classList.add('selected');
+            }
+            break;
+        case 'Space':
+            if (currSelection.textContent.includes('1')) {botMode = true};
+            startGame();
+            break;
+        default:
+            console.log(code);
+            return;
+    }
+    
+    // Cancel the default action to avoid it being handled twice
+    event.preventDefault();
+}, true);
+    // the last option dispatches the event to the listener first,
+    // then dispatches event to window
+
+// Functions
+//
+// Start game function
+function startGame() {
+    title.style.position = 'absolute';
+    title.style.animation = 'title 2s';
+    title.style.top = '5%';
+    startScreenSection.style.display = 'none';
+    main.style.display = 'flex';
+}
+
+// Get current player function
 const getCurrentPlayer = () => {return (oddTurn ? players[0] : players[1])};
+
+// Starting display
 displayController.displayBoard();
+
+const playerBot = () => {
+    const player = Player('bot', 'O');
+    const takeTurn = (position) => {
+        player.markBoard(position);
+    }
+    return {
+        ...player,
+        takeTurn
+    }
+}
+
+var bot = playerBot();
+

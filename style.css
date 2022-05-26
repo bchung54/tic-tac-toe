@@ -1,0 +1,207 @@
+@font-face {
+    font-family: LetterSketch;
+    src: url(./fonts/Lettersketch-ow1wV.ttf);
+}
+
+@font-face {
+    font-family: CoalBrush;
+    src: url(./fonts/DkCoalBrushRegular-14vB.otf);
+}
+
+@font-face {
+    font-family: Atari;
+    src: url(./fonts/AtariClassicChunky-PxXP.ttf);
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    justify-content: center;
+    align-items: center;
+
+    background-color: rgba(255, 230, 0, 0.192);
+    color: steelblue;
+
+    font-family: Atari, Arial, Helvetica, sans-serif;
+    font-weight: bold;
+}
+
+h1 {
+    padding: 72px;
+    font-family: LetterSketch, Arial, Helvetica, sans-serif;
+    font-size: 120px;
+    text-shadow: 6px 6px 6px brown;
+}
+
+/* Start Screen */
+#start-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    font-size: 26px;
+}
+
+em {
+    font-style: italic;
+    color: rgb(138, 106, 0);
+}
+
+.selected {
+    list-style-type: square; /* turn into triangle pointer */
+}
+
+.start-instruction {
+    margin: 50px;
+}
+
+/* Game Content */
+#board {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+table {
+    display: flex;
+    justify-content: center;
+    border-spacing: 0;
+    border-collapse: collapse;
+    background-color: rgba(204, 184, 0, 0.966);
+    box-shadow:4px 4px 4px brown;
+}
+
+tr {
+    display: flex;
+}
+
+td {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 150px;
+    width: 150px;
+    border: 4px solid rgb(128, 34, 34);
+    color: rgba(255, 0, 0, 0.788);
+    font-family: CoalBrush, Impact, 'Arial Narrow Bold', sans-serif;
+    font-size: 100px;
+}
+
+td:hover {
+    box-shadow: 6px 8px 4px rgb(179, 1, 1);
+    transition: box-shadow 0.2s ease-in-out;
+}
+
+input {
+    height: 50px;
+    width: 240px;
+    padding: 0 12px;
+    border-style: hidden;
+    text-align: center;
+    color: steelblue;
+    font-family: Atari, Arial, Helvetica, sans-serif;
+    font-size: 20px;
+}
+
+input:hover {
+    border-bottom-style: groove;
+    border-color: red;
+}
+
+input[submit] {
+    opacity: 0.4;
+    font-size: 16px;
+}
+
+input[submit]:hover {
+    opacity: 1;
+}
+
+/* Modal */
+.bg-modal {
+    position: absolute;
+    top: 0;
+    display: none;
+    justify-content: center;
+    align-items: flex-start;
+    height: 100%;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+}
+
+.modal-content {
+    position: relative;
+    display: flex;
+    height: 300px;
+    width: 800px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+    background-color: white;
+    font-size: 32px;
+}
+
+.close {
+    position: absolute;
+    top: 0;
+    right: 14px;
+    font-size: 50px;
+    transform: rotate(45deg);
+    cursor: pointer;
+}
+
+#restart-btn {
+    padding: 12px;
+    border-radius: 8px;
+    margin: 20px;
+    text-align: center;
+    background-color: rgba(255, 34, 34, 0.822);
+    color: white;
+    font-family: Atari, Arial, Helvetica, sans-serif;
+    font-size: 20px;
+}
+
+main {
+    display: none;
+    width: 75vw;
+    justify-content: space-evenly;
+    padding: 36px;
+}
+
+@keyframes title {
+    from {
+        top: 40%;
+        display: none;
+    }
+    to {
+        top: 5%;
+        display: flex;
+    }
+}
+
+.player-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 12px;  
+    font-size: 20px;
+}
+
+
+::placeholder {
+    font-family: Atari, Arial, Arial, Helvetica, sans-serif;
+}
+
+.hide {
+    display: none;
+}
+
+h3 {
+    padding: 12px;
+}
+
+.player-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}

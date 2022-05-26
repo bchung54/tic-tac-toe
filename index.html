@@ -5,49 +5,64 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="script.js" defer></script>
-    <link rel="stylesheet" href="styles.css">
-    <title>Document</title>
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <title>Tic Tac Toe</title>
 </head>
 <body>
-    <div id="title">Tic Tac Toe</div>
-    <button id="restart-btn">RESTART</button>
-    <section id="board">
+    <h1 id="title">Tic Tac Toe</h1>
+
+    <!-- Start Screen -->
+    <section id="start-screen">
+        <ul>
+            <li id="1p" class="start-option selected">1 PLAYER</li>
+            <li id="2p" class="start-option">2 PLAYERS</li>
+        </ul>
+        <!-- <div class="start-instruction">PRESS <em>D</em> TO CHANGE DIFFICULTY</div> -->
+        <div class="start-instruction">PRESS <em>SPACE</em> TO PLAY GAME</div>
+    </section>
+
+    <main id="game-display">
 
         <section id="p1section" class="player-section">
-            <div id="p1Title">Player 1:</div>
+            <h3 id="p1Title">Player 1</h3>
             <div id="player1form" class="player-form">
-                <input type="text" id="player1-input" onfocus="this.value=''" placeholder="Enter Player 1 Name">
-                <button class="playername-btn" id="player1-btn">Enter</button>
+                <input type="text" id="player1-input" onfocus="this.value=''" placeholder="Enter Name">
+                <input type="submit" id="player1-btn"></button>
             </div>
         </section>
         
-        <table>
-            <tr>
-                <td id="box-0"></td>
-                <td id="box-1"></td>
-                <td id="box-2"></td>
-            </tr>
-            <tr>
-                <td id="box-3"></td>
-                <td id="box-4"></td>
-                <td id="box-5"></td>
-            </tr>
-            <tr>
-                <td id="box-6"></td>
-                <td id="box-7"></td>
-                <td id="box-8"></td>
-            </tr>
-        </table>
+        <section id="board">
+            <table>
+                <tr>
+                    <td id="box-0"></td>
+                    <td id="box-1"></td>
+                    <td id="box-2"></td>
+                </tr>
+                <tr>
+                    <td id="box-3"></td>
+                    <td id="box-4"></td>
+                    <td id="box-5"></td>
+                </tr>
+                <tr>
+                    <td id="box-6"></td>
+                    <td id="box-7"></td>
+                    <td id="box-8"></td>
+                </tr>
+            </table>
+            <button id="restart-btn">RESTART</button>
+        </section>
         
         <section id="p2section" class="player-section">
-            <div id="p2Title">Player 2:</div>
+            <h3 id="p2Title">Player 2</h3>
             <div id="player2form" class="player-form">
-                <input type="text" id="player2-input" onfocus="this.value=''" placeholder="Enter Player 2 Name">
-                <button class="playername-btn" id="player2-btn">Enter</button>
+                <input type="text" id="player2-input" onfocus="this.value=''" placeholder="Enter Name">
+                <input type="submit" id="player2-btn"></button>
             </div>
-        </section>
-
-    </section>
+        </section> 
+    </main>
+   
     
     <!-- Modal Section -->
     <div class="bg-modal">
