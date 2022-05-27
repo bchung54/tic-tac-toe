@@ -74,35 +74,35 @@ const gameBoard = (function() {
     };
 
     // check win conditions
-    const checkWin = () => {
+    const checkWin = (arr) => {
 
         // check rows for win condition
         for (let row = 0; row < 3; row++) {
-            let rowSet = new Set(gameArr.slice(row * 3, (row + 1) * 3));
+            let rowSet = new Set(arr.slice(row * 3, (row + 1) * 3));
             if (rowSet.size == 1 && !rowSet.has(undefined)) {
-                return (gameArr[row * 3] == players[0].getSymbol() ? players[0] : players[1]);
+                return (arr[row * 3] == players[0].getSymbol() ? players[0] : players[1]);
             }
         }
 
         // check columns for win condition
         for (let col = 0; col < 3; col++) {
-            let colSet = new Set([gameArr[col], gameArr[col + 3], gameArr[col + 6]]);
+            let colSet = new Set([arr[col], arr[col + 3], arr[col + 6]]);
 
             if (colSet.size == 1 && !colSet.has(undefined)) {
-                return (gameArr[col] == players[0].getSymbol() ? players[0] : players[1]);
+                return (arr[col] == players[0].getSymbol() ? players[0] : players[1]);
             }
         }
 
         // check diagonals for win condition
 
-        let bslashSet = new Set([gameArr[0], gameArr[4], gameArr[8]]);
+        let bslashSet = new Set([arr[0], arr[4], arr[8]]);
         if (bslashSet.size == 1 && !bslashSet.has(undefined)) {
-            return (gameArr[0] == players[0].getSymbol() ? players[0] : players[1]);
+            return (arr[0] == players[0].getSymbol() ? players[0] : players[1]);
         } 
 
-        let fslashSet = new Set([gameArr[2], gameArr[4], gameArr[6]]);
+        let fslashSet = new Set([arr[2], arr[4], arr[6]]);
         if (fslashSet.size == 1 && !fslashSet.has(undefined)) {
-            return (gameArr[2] == players[0].getSymbol() ? players[0] : players[1]); 
+            return (arr[2] == players[0].getSymbol() ? players[0] : players[1]); 
         }
 
         return false;
@@ -114,8 +114,8 @@ const gameBoard = (function() {
         const msgContainer = document.querySelector('.endgame-msg');
         if (msgContainer.firstChild) {msgContainer.removeChild(msgContainer.firstChild)};
 
-        if (checkWin()) {
-            let msg = document.createTextNode(`${checkWin().getName()} Wins!`);
+        if (checkWin(gameArr)) {
+            let msg = document.createTextNode(`${checkWin(gameArr).getName()} Wins!`);
             msgContainer.appendChild(msg);
             document.querySelector('.bg-modal').style.display = 'flex';
             return true;
@@ -141,7 +141,7 @@ const gameBoard = (function() {
         isGameOver,
         isCellEmpty,
         initPlayers,
-        botMode
+        checkWin
     }
 })();
 
@@ -176,18 +176,31 @@ const displayController = (function() {
 
 // Bot Module
 const playerBot = (() => {
-    const player = Player('BOT', 'O');
+    const bot = Player('BOT', 'O');
     const chooseRandom = () => {
         do {random = Math.floor(Math.random() * 9)}
         while(!gameBoard.isCellEmpty(random));
         return random;
     }
+    const blockWin = () => {
+        for (let i = 0; i < gameBoard.getArray().length; i++) {
+            const copy = [...gameBoard.getArray()];
+            if (gameBoard.isCellEmpty(i)){
+                copy[i] = 'X';
+                if (gameBoard.checkWin(copy)) {
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
     const chooseCell = () => {
-        return chooseRandom();
+        if (blockWin() == -1) {return chooseRandom()};
+        return blockWin();
     }
 
     return {
-        ...player,
+        ...bot,
         chooseCell
     }
 })();
@@ -241,6 +254,10 @@ window.addEventListener("keydown", function(event) {
             }
             break;
         case 'Space':
+            if (currSelection.textContent.includes('1')) {
+                document.getElementById('p2Title').textContent = "BOT";
+                document.getElementById('player2form').style.display = 'none';
+            }
             startGame();
             break;
         default:
@@ -266,7 +283,7 @@ function startGame() {
     main.style.animation = 'main 2s';
     main.style.transform = 'scale(1)';
     gameBoard.initPlayers();
-    console.log(gameBoard.botMode);
+
 }
 
 // Submitting player name

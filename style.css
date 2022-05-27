@@ -198,7 +198,7 @@ main {
     width: 75vw;
     justify-content: space-evenly;
     padding: 36px;
-    /* transform: scale(0); */
+    transform: scale(0);
 }
 
 @keyframes main {
