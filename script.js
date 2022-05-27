@@ -1,7 +1,3 @@
-// Boolean: keeps track of whose turn
-let oddTurn = true;
-let botMode = false;
-
 // DOM Elements
 const title = document.getElementById('title');
 const main = document.querySelector('main');
@@ -14,52 +10,13 @@ const modalClose = document.querySelector('.close');
 // Factory functions
 //
 // Player Factory Function
-const Player = (name, symbol) => {
+const Player = (name, symbol, bot) => {
     const getName = () => name;
     const getSymbol = () => symbol;
-    const markBoard = (position) => {
-        console.log(gameBoard.getArray()); 
-        return gameBoard.addMark(getSymbol(), position);
-    };
 
     return {
         getName,
         getSymbol,
-        markBoard
-    }
-};
-
-// Player array
-const players = new Array(Player("Player1", 'X'), Player("Player2", 'O'));
-
-// Cell Factory Function
-const Cell = (position) => {
-    const getPosition = () => position;
-    const getSymbol = () => gameBoard.getArray()[position];
-    const addEvent = (container) => {
-        container.addEventListener('click', () => {
-            if (gameBoard.isCellEmpty(position)) {
-                getCurrentPlayer().markBoard(position);
-                oddTurn = !oddTurn;
-                displayController.displayCell(position);
-                gameBoard.isGameOver();
-                if (botMode) {
-                    if(gameBoard.isGameOver()) {return}; 
-                    let randomEmptyCell = gameBoard.nextEmptyCell();
-                    console.log(randomEmptyCell);
-                    bot.takeTurn(randomEmptyCell);
-                    oddTurn = !oddTurn;
-                    displayController.displayCell(randomEmptyCell);
-                    gameBoard.isGameOver();
-                }
-            }
-        });
-    }
-
-    return {
-        getPosition,
-        getSymbol,
-        addEvent
     }
 };
 
@@ -68,35 +25,52 @@ const Cell = (position) => {
 // Game Board Module
 const gameBoard = (function() {
 
-    // create array for each position in tic tac toe board
-    let arr = new Array(9);
+    // Boolean: keeps track turns
+    let oddTurn = true;
+    // Boolean: keeps track of bot mode
+    let botMode = true;
+    // Array: keeps track of each position in tic tac toe board
+    let gameArr = new Array(9);
 
-    // allow other modules and functions to get array
-    const getArray = () => {
-        return arr;
-    };
+    let players = new Array(2);
 
-    // empty the game array
-    const clearBoard = () => {
-        arr = new Array(9);
-    };
-
-    // mark the board
-    const addMark = (symbol, position) => { 
-        if (arr[position]) {
-            return false;
+    const initPlayers = () => {
+        if (botMode) {
+            players = new Array(Player("Player1", 'X'), playerBot);
         } else {
-            arr[position] = symbol;
-            return true;
+            players = new Array(Player("Player1", 'X'), Player("Player2", 'O'));
         }
     };
 
-    const nextEmptyCell = () => {
-        do {
-            random = Math.floor(Math.random() * 9);
+    const switchTurn = () => {oddTurn = !oddTurn};
+    const getCurrentPlayer = () => {return (oddTurn ? players[0] : players[1])};
+    const resetTurn = () => {oddTurn = true};
+
+    const toggleBotMode = () => {botMode = !botMode};
+
+    const getArray = () => {return gameArr};
+    const isCellEmpty = (position) => {return (gameArr[position] ? false : true)};
+    const clearBoard = () => {gameArr = new Array(9)};
+    
+    const addMark = (symbol, position) => { 
+        if (isCellEmpty(position)) {
+            gameArr[position] = symbol;
+            displayController.displayCell(position);
+            switchTurn();
         }
-        while(!gameBoard.isCellEmpty(random));
-        return random;
+    };
+
+    const addCellEvent = (container, position) => {
+        container.addEventListener('click', () => {
+            if (isCellEmpty(position)) {
+                addMark(getCurrentPlayer().getSymbol(), position);
+                if (isGameOver()) {return};
+                if (botMode) {
+                    addMark(playerBot.getSymbol(), playerBot.chooseCell());
+                    isGameOver();
+                }
+            }
+        });
     };
 
     // check win conditions
@@ -104,31 +78,31 @@ const gameBoard = (function() {
 
         // check rows for win condition
         for (let row = 0; row < 3; row++) {
-            let rowSet = new Set(arr.slice(row * 3, (row + 1) * 3));
+            let rowSet = new Set(gameArr.slice(row * 3, (row + 1) * 3));
             if (rowSet.size == 1 && !rowSet.has(undefined)) {
-                return (arr[row * 3] == players[0].getSymbol() ? players[0] : players[1]);
+                return (gameArr[row * 3] == players[0].getSymbol() ? players[0] : players[1]);
             }
         }
 
         // check columns for win condition
         for (let col = 0; col < 3; col++) {
-            let colSet = new Set([arr[col], arr[col + 3], arr[col + 6]]);
+            let colSet = new Set([gameArr[col], gameArr[col + 3], gameArr[col + 6]]);
 
             if (colSet.size == 1 && !colSet.has(undefined)) {
-                return (arr[col] == players[0].getSymbol() ? players[0] : players[1]);
+                return (gameArr[col] == players[0].getSymbol() ? players[0] : players[1]);
             }
         }
 
         // check diagonals for win condition
 
-        let bslashSet = new Set([arr[0], arr[4], arr[8]]);
+        let bslashSet = new Set([gameArr[0], gameArr[4], gameArr[8]]);
         if (bslashSet.size == 1 && !bslashSet.has(undefined)) {
-            return (arr[0] == players[0].getSymbol() ? players[0] : players[1]);
+            return (gameArr[0] == players[0].getSymbol() ? players[0] : players[1]);
         } 
 
-        let fslashSet = new Set([arr[2], arr[4], arr[6]]);
+        let fslashSet = new Set([gameArr[2], gameArr[4], gameArr[6]]);
         if (fslashSet.size == 1 && !fslashSet.has(undefined)) {
-            return (arr[2] == players[0].getSymbol() ? players[0] : players[1]); 
+            return (gameArr[2] == players[0].getSymbol() ? players[0] : players[1]); 
         }
 
         return false;
@@ -147,8 +121,8 @@ const gameBoard = (function() {
             return true;
         }
 
-        for (let i = 0; i < arr.length; i++) {
-            if ('undefined' == typeof arr[i]) {return false}
+        for (let i = 0; i < gameArr.length; i++) {
+            if ('undefined' == typeof gameArr[i]) {return false}
         }
 
         let msg = document.createTextNode("It's a Tie!");
@@ -157,16 +131,17 @@ const gameBoard = (function() {
         return true;
     };
 
-    // check if cell is empty
-    const isCellEmpty = (position) => {return (arr[position] ? false : true)};
-
     return {
         getArray,
         clearBoard,
-        nextEmptyCell,
+        toggleBotMode,
+        resetTurn,
         addMark,
+        addCellEvent,
         isGameOver,
-        isCellEmpty
+        isCellEmpty,
+        initPlayers,
+        botMode
     }
 })();
 
@@ -182,13 +157,12 @@ const displayController = (function() {
         for (let i = 0; i < 9; i++) {
             let box = document.getElementById(`box-${i}`);
             if (box.firstChild) {box.removeChild(box.firstChild)};
-            let cell = Cell(i);
-            cell.addEvent(box);
+            gameBoard.addCellEvent(box, i);
         }
     };
 
     const clearDisplay = () => {
-        oddTurn = true;
+        gameBoard.resetTurn();
         gameBoard.clearBoard();
         displayBoard();
     };
@@ -197,6 +171,24 @@ const displayController = (function() {
         displayCell,
         displayBoard,
         clearDisplay
+    }
+})();
+
+// Bot Module
+const playerBot = (() => {
+    const player = Player('BOT', 'O');
+    const chooseRandom = () => {
+        do {random = Math.floor(Math.random() * 9)}
+        while(!gameBoard.isCellEmpty(random));
+        return random;
+    }
+    const chooseCell = () => {
+        return chooseRandom();
+    }
+
+    return {
+        ...player,
+        chooseCell
     }
 })();
 
@@ -238,16 +230,17 @@ window.addEventListener("keydown", function(event) {
             if (currSelection.textContent.includes('1')) {
                 currSelection.classList.remove('selected');
                 document.getElementById('2p').classList.add('selected');
+                gameBoard.toggleBotMode();
             }
             break;
         case 'ArrowUp':
             if (currSelection.textContent.includes('2')) {
                 currSelection.classList.remove('selected');
                 document.getElementById('1p').classList.add('selected');
+                gameBoard.toggleBotMode();
             }
             break;
         case 'Space':
-            if (currSelection.textContent.includes('1')) {botMode = true};
             startGame();
             break;
         default:
@@ -272,6 +265,8 @@ function startGame() {
     main.style.top = '30%';
     main.style.animation = 'main 2s';
     main.style.transform = 'scale(1)';
+    gameBoard.initPlayers();
+    console.log(gameBoard.botMode);
 }
 
 // Submitting player name
@@ -280,32 +275,14 @@ function onNameSubmit(e) {
     let userInput = e.target.elements[0];
     (userInput.value ? userInput.placeholder = userInput.value : userInput.value = userInput.id);
     if (userInput.id == "P1") {
-        players[0] = Player(userInput.value, 'X');
+        gameBoard.players[0] = Player(userInput.value, 'X');
     } else {
-        players[1] = Player(userInput.value, 'O');
+        gameBoard.players[1] = Player(userInput.value, 'O');
     };
     e.target.elements[1].classList.add('submitted');
-    console.log(e.target.elements[1]);
-    console.log(userInput.value);
     return false;
 }
 
-// Get current player function
-const getCurrentPlayer = () => {return (oddTurn ? players[0] : players[1])};
-
-// Starting display
+// Start display
 displayController.displayBoard();
-
-const playerBot = () => {
-    const player = Player('bot', 'O');
-    const takeTurn = (position) => {
-        player.markBoard(position);
-    }
-    return {
-        ...player,
-        takeTurn
-    }
-}
-
-var bot = playerBot();
 
