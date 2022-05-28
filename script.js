@@ -1,8 +1,9 @@
 // DOM Elements
 const title = document.getElementById('title');
 const main = document.querySelector('main');
-const startScreenText = document.querySelector('.start-text');
-const restartButton = document.getElementById('restart-btn');
+const startMenu = document.querySelector('.start-menu');
+const clearButton = document.getElementById('clear-btn');
+const returnButton = document.getElementById('return-btn');
 const modalContent = document.querySelector('.modal-content');
 const bgModal = document.querySelector('.bg-modal');
 const modalClose = document.querySelector('.close');
@@ -10,12 +11,14 @@ const modalClose = document.querySelector('.close');
 // Factory functions
 //
 // Player Factory Function
-const Player = (name, symbol, bot) => {
+const Player = (name, symbol) => {
     const getName = () => name;
+    const setName = (newName) => {name = newName}; 
     const getSymbol = () => symbol;
 
     return {
         getName,
+        setName,
         getSymbol,
     }
 };
@@ -43,11 +46,10 @@ const gameBoard = (function() {
     };
 
     const switchTurn = () => {oddTurn = !oddTurn};
-    const getCurrentPlayer = () => {return (oddTurn ? players[0] : players[1])};
     const resetTurn = () => {oddTurn = true};
-
+    const getCurrentPlayer = () => {return (oddTurn ? players[0] : players[1])};
+    const setPlayerName = (name, number) => {players[number].setName(name)};
     const toggleBotMode = () => {botMode = !botMode};
-
     const getArray = () => {return gameArr};
     const isCellEmpty = (position) => {return (gameArr[position] ? false : true)};
     const clearBoard = () => {gameArr = new Array(9)};
@@ -73,16 +75,14 @@ const gameBoard = (function() {
         });
     };
 
-    // check win conditions
     const checkWin = (arr) => {
-
         // check rows for win condition
         for (let row = 0; row < 3; row++) {
             let rowSet = new Set(arr.slice(row * 3, (row + 1) * 3));
             if (rowSet.size == 1 && !rowSet.has(undefined)) {
                 return (arr[row * 3] == players[0].getSymbol() ? players[0] : players[1]);
             }
-        }
+        };
 
         // check columns for win condition
         for (let col = 0; col < 3; col++) {
@@ -91,57 +91,56 @@ const gameBoard = (function() {
             if (colSet.size == 1 && !colSet.has(undefined)) {
                 return (arr[col] == players[0].getSymbol() ? players[0] : players[1]);
             }
-        }
+        };
 
         // check diagonals for win condition
-
         let bslashSet = new Set([arr[0], arr[4], arr[8]]);
         if (bslashSet.size == 1 && !bslashSet.has(undefined)) {
             return (arr[0] == players[0].getSymbol() ? players[0] : players[1]);
-        } 
-
+        };
         let fslashSet = new Set([arr[2], arr[4], arr[6]]);
         if (fslashSet.size == 1 && !fslashSet.has(undefined)) {
             return (arr[2] == players[0].getSymbol() ? players[0] : players[1]); 
-        }
+        };
 
         return false;
 
     };
 
-    // checks if game ends
     const isGameOver = () => {
-        const msgContainer = document.querySelector('.endgame-msg');
-        if (msgContainer.firstChild) {msgContainer.removeChild(msgContainer.firstChild)};
+        let msg;
 
         if (checkWin(gameArr)) {
-            let msg = document.createTextNode(`${checkWin(gameArr).getName()} Wins!`);
-            msgContainer.appendChild(msg);
-            document.querySelector('.bg-modal').style.display = 'flex';
-            return true;
-        }
+            msg = `${checkWin(gameArr).getName()} Wins!`;
+        } else {
+            for (let i = 0; i < gameArr.length; i++) {
+                if ('undefined' == typeof gameArr[i]) {return false};
+            }
+            msg = "It's a Tie!";
+        };
 
-        for (let i = 0; i < gameArr.length; i++) {
-            if ('undefined' == typeof gameArr[i]) {return false}
-        }
-
-        let msg = document.createTextNode("It's a Tie!");
-        msgContainer.appendChild(msg);
-        document.querySelector('.bg-modal').style.display = 'flex';
-        return true;
+        return displayController.displayModal(msg);
     };
 
     return {
+        // Array Methods
         getArray,
-        clearBoard,
+        addMark,
+        
+        // Player Methods
+        initPlayers,
+        setPlayerName,
+        
+        // Cell Methods
+        addCellEvent,
+        isCellEmpty,
+
+        // Board Setting Methods
         toggleBotMode,
         resetTurn,
-        addMark,
-        addCellEvent,
+        clearBoard,
+        checkWin,
         isGameOver,
-        isCellEmpty,
-        initPlayers,
-        checkWin
     }
 })();
 
@@ -158,7 +157,31 @@ const displayController = (function() {
             let box = document.getElementById(`box-${i}`);
             if (box.firstChild) {box.removeChild(box.firstChild)};
             gameBoard.addCellEvent(box, i);
-        }
+        };
+    };
+
+    const displayModal = (message) => {
+        const container = document.querySelector('.endgame-msg');
+        container.textContent = message;
+        bgModal.style.display = 'flex';
+        return true;
+    };
+
+    // Start game function
+    const displayStart = () => {
+        title.style.position = 'absolute';
+        title.style.animation = 'titleUp 1s';
+        title.style.top = '5%';
+
+        startMenu.style.display = 'none';
+        
+        main.style.position = 'absolute';
+        main.style.top = '30%';
+        main.style.animation = 'showMain 2s';
+        main.style.transform = 'scale(1)';
+        
+        gameBoard.initPlayers();
+        displayBoard();
     };
 
     const clearDisplay = () => {
@@ -167,10 +190,31 @@ const displayController = (function() {
         displayBoard();
     };
 
+    const closeModal = () => {
+        bgModal.style.display = 'none';
+        clearDisplay();
+    };
+
+    const returnStartMenu = () => {
+        title.style.animation = 'titleDown 2s';
+        title.style.position = 'static';
+
+        startMenu.style.display = 'flex';
+        startMenu.style.animation = 'showStartMenu 1.5s';
+
+        main.style.position = 'static';
+        main.style.animation = 'hideMain 1s';
+        main.style.transform = 'scale(0)';
+    }
+
     return {
         displayCell,
         displayBoard,
-        clearDisplay
+        displayModal,
+        displayStart,
+        clearDisplay,
+        returnStartMenu,
+        closeModal
     }
 })();
 
@@ -181,7 +225,7 @@ const playerBot = (() => {
         do {random = Math.floor(Math.random() * 9)}
         while(!gameBoard.isCellEmpty(random));
         return random;
-    }
+    };
     const blockWin = () => {
         for (let i = 0; i < gameBoard.getArray().length; i++) {
             const copy = [...gameBoard.getArray()];
@@ -193,11 +237,11 @@ const playerBot = (() => {
             }
         }
         return -1;
-    }
+    };
     const chooseCell = () => {
         if (blockWin() == -1) {return chooseRandom()};
         return blockWin();
-    }
+    };
 
     return {
         ...bot,
@@ -207,19 +251,15 @@ const playerBot = (() => {
 
 // Event Listeners
 //
-// Restart button event
-restartButton.addEventListener('click', () => {displayController.clearDisplay()});
+// Clear button event
+clearButton.addEventListener('click', displayController.clearDisplay);
 
-// Modal event listeners
+// Return to start menu button event
+returnButton.addEventListener('click', displayController.returnStartMenu);
+
 // Modal close event
-modalClose.addEventListener('click', () => {document.querySelector('.bg-modal').style.display = 'none'});
-modalClose.addEventListener('click', () => {displayController.clearDisplay()});
-
-// Modal background event
-bgModal.addEventListener('click', () => {
-    document.querySelector('.bg-modal').style.display = 'none';
-    displayController.clearDisplay();
-});
+modalClose.addEventListener('click', displayController.closeModal); // for X close
+bgModal.addEventListener('click', displayController.closeModal); // for background close
 
 // Modal content event
 modalContent.addEventListener('click', (e) => {
@@ -237,6 +277,8 @@ window.addEventListener("keydown", function(event) {
     
     const code = event.code;
     const currSelection = document.querySelector('.selected');
+    const p2FormTitle = document.getElementById('p2Title');
+    const p2Form = document.getElementById('player2form');
 
     switch (code) {
         case 'ArrowDown':
@@ -255,10 +297,13 @@ window.addEventListener("keydown", function(event) {
             break;
         case 'Space':
             if (currSelection.textContent.includes('1')) {
-                document.getElementById('p2Title').textContent = "BOT";
-                document.getElementById('player2form').style.display = 'none';
+                p2FormTitle.textContent = "BOT";
+                p2Form.style.display = 'none';
+            } else {
+                p2FormTitle.textContent = "PLAYER 2";
+                p2Form.style.display = 'flex';
             }
-            startGame();
+            displayController.displayStart();
             break;
         default:
             return;
@@ -272,29 +317,15 @@ window.addEventListener("keydown", function(event) {
 
 // Functions
 //
-// Start game function
-function startGame() {
-    title.style.position = 'absolute';
-    title.style.animation = 'title 1s';
-    title.style.top = '5%';
-    startScreenText.style.display = 'none';
-    main.style.position = 'absolute';
-    main.style.top = '30%';
-    main.style.animation = 'main 2s';
-    main.style.transform = 'scale(1)';
-    gameBoard.initPlayers();
-
-}
-
 // Submitting player name
 function onNameSubmit(e) {
     e.preventDefault();
     let userInput = e.target.elements[0];
     (userInput.value ? userInput.placeholder = userInput.value : userInput.value = userInput.id);
     if (userInput.id == "P1") {
-        gameBoard.players[0] = Player(userInput.value, 'X');
+        gameBoard.setPlayerName(userInput.value, 0);
     } else {
-        gameBoard.players[1] = Player(userInput.value, 'O');
+        gameBoard.setPlayerName(userInput.value, 1);
     };
     e.target.elements[1].classList.add('submitted');
     return false;

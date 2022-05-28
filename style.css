@@ -27,13 +27,6 @@ body {
     font-weight: bold;
 }
 
-h1 {
-    padding: 72px;
-    font-family: LetterSketch, Arial, Helvetica, sans-serif;
-    font-size: 120px;
-    text-shadow: 6px 6px 6px brown;
-}
-
 /* Start Screen */
 #start-screen {
     display: flex;
@@ -43,14 +36,21 @@ h1 {
     font-size: 28px;
 }
 
-li {
-    margin-top: 8px;
+h1 {
+    padding: 72px;
+    font-family: LetterSketch, Arial, Helvetica, sans-serif;
+    font-size: 120px;
+    text-shadow: 6px 6px 6px brown;
 }
 
-.start-text {
+.start-menu {
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+li {
+    margin-top: 8px;
 }
 
 em {
@@ -60,24 +60,10 @@ em {
 }
 
 .selected::marker {
-    position: relative;
     font-size: 20px;
     color:rgb(138, 106, 0);
     content: "▶ ";
     animation: blink 1s infinite;
-}
-
-@keyframes blink {
-    0% {
-        opacity: 1;
-    }
-    50% {
-        opacity: 0;
-    }
-    100% {
-        opacity: 1;
-    }
-    
 }
 
 .start-instruction {
@@ -182,7 +168,7 @@ input:hover {
     cursor: pointer;
 }
 
-#restart-btn {
+button {
     padding: 12px;
     border-radius: 8px;
     margin: 20px;
@@ -201,28 +187,13 @@ main {
     transform: scale(0);
 }
 
-@keyframes main {
-    from {
-        transform: scale(0);
-    }
-    to {
-        transform: scale(1);
-    }
-}
 
-@keyframes title {
-    from {
-        top: 40%;
-    }
-    to {
-        top: 5%;
-    }
-}
 
 .player-section {
     display: flex;
     flex-direction: column;
     align-items: center;
+    width: 20vw;
     margin: 12px;  
     font-size: 20px;
 }
@@ -250,4 +221,69 @@ h3 {
 
 .submitted {
     display: none;
+}
+
+/* Animations */
+
+@keyframes blink {
+    0% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0;
+    }
+    100% {
+        opacity: 1;
+    }
+    
+}
+
+@keyframes showMain {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes titleUp {
+    from {
+        top: 30%;
+    }
+    to {
+        top: 5%;
+    }
+}
+
+@keyframes showStartMenu {
+    from {
+        transform: scale(0);
+    }
+    to {
+        transform: scale(1);
+    }
+}
+
+@keyframes hideMain {
+    0% {
+        transform: scale(1);
+    }
+    100% {
+        transform: scale(0);
+    }
+}
+
+@keyframes titleDown {
+    0% {
+        position: absolute;
+        top: 5%;
+    }
+    75% {
+        position: static;
+        top: 40%;
+    }
+    100% {
+        position: static;
+    }
 }

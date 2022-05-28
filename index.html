@@ -15,7 +15,7 @@
     <section id="start-screen">
         <h1 id="title">Tic Tac Toe</h1>
 
-        <div class="start-text">
+        <div class="start-menu">
             <ul>
                 <li id="1p" class="start-option selected">1 PLAYER</li>
                 <li id="2p" class="start-option">2 PLAYERS</li>
@@ -27,7 +27,7 @@
 
     <main id="game-display">
         <section id="p1section" class="player-section">
-            <h3 id="p1Title">Player 1</h3>
+            <h3 id="p1Title">PLAYER 1</h3>
             <form id="player1form" class="player-form" onsubmit="onNameSubmit(event)">
                 <input type="text" id="P1" class="name-input" onfocus="this.value=''" placeholder="Enter Name">
                 <input type="submit" class="submit-btn">
@@ -52,11 +52,12 @@
                     <td id="box-8"></td>
                 </tr>
             </table>
-            <button id="restart-btn">RESTART</button>
+            <button id="clear-btn">CLEAR BOARD</button>
+            <button id="return-btn">RETURN TO START</button>
         </section>
         
         <section id="p2section" class="player-section">
-            <h3 id="p2Title">Player 2</h3>
+            <h3 id="p2Title">PLAYER 2</h3>
             <form id="player2form" class="player-form" onsubmit="onNameSubmit(event)">
                 <input  type="text" id="P2" class="name-input" onfocus="this.value=''" placeholder="Enter Name">
                 <input type="submit" class="submit-btn">
