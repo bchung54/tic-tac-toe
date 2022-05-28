@@ -34,7 +34,7 @@ const gameBoard = (function() {
     let botMode = true;
     // Array: keeps track of each position in tic tac toe board
     let gameArr = new Array(9);
-
+    // Array: keeps track of players
     let players = new Array(2);
 
     const initPlayers = () => {
@@ -111,8 +111,10 @@ const gameBoard = (function() {
         let msg;
 
         if (checkWin(gameArr)) {
+            // check for winner and make appropriate message
             msg = `${checkWin(gameArr).getName()} Wins!`;
         } else {
+            // check if there are any empty cells
             for (let i = 0; i < gameArr.length; i++) {
                 if ('undefined' == typeof gameArr[i]) {return false};
             }
