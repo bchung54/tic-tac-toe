@@ -71,6 +71,16 @@ em {
 }
 
 /* Game Content */
+
+main {
+    display: flex;
+    width: 75vw;
+    justify-content: space-evenly;
+    padding: 36px;
+    transform: scale(0);
+}
+
+/* Board section */
 #board {
     display: flex;
     flex-direction: column;
@@ -107,6 +117,27 @@ td:hover {
     transition: box-shadow 0.2s ease-in-out;
 }
 
+/* Player section */
+.player-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 20vw;
+    margin: 12px;  
+    font-size: 20px;
+}
+
+h3 {
+    border-bottom: 4px solid steelblue;
+    padding: 12px;
+}
+
+.player-form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
 input {
     height: 50px;
     width: 240px;
@@ -124,6 +155,11 @@ input:hover {
     border-color: red;
 }
 
+::placeholder {
+    opacity: 0.7;
+    font-family: Atari, Arial, Arial, Helvetica, sans-serif;
+}
+
 .submit-btn {
     background-color: rgb(255, 0, 0);
     opacity: 0.4;
@@ -135,7 +171,27 @@ input:hover {
     opacity: 0.7;
 }
 
+button {
+    padding: 12px;
+    border-radius: 8px;
+    margin: 20px;
+    text-align: center;
+    background-color: rgba(255, 34, 34, 0.822);
+    color: white;
+    font-family: Atari, Arial, Helvetica, sans-serif;
+    font-size: 20px;
+}
+
+.hide {
+    display: none;
+}
+
+.submitted {
+    display: none;
+}
+
 /* Modal */
+
 .bg-modal {
     position: absolute;
     top: 0;
@@ -166,61 +222,6 @@ input:hover {
     font-size: 50px;
     transform: rotate(45deg);
     cursor: pointer;
-}
-
-button {
-    padding: 12px;
-    border-radius: 8px;
-    margin: 20px;
-    text-align: center;
-    background-color: rgba(255, 34, 34, 0.822);
-    color: white;
-    font-family: Atari, Arial, Helvetica, sans-serif;
-    font-size: 20px;
-}
-
-main {
-    display: flex;
-    width: 75vw;
-    justify-content: space-evenly;
-    padding: 36px;
-    transform: scale(0);
-}
-
-
-
-.player-section {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 20vw;
-    margin: 12px;  
-    font-size: 20px;
-}
-
-
-::placeholder {
-    opacity: 0.7;
-    font-family: Atari, Arial, Arial, Helvetica, sans-serif;
-}
-
-.hide {
-    display: none;
-}
-
-h3 {
-    border-bottom: 4px solid steelblue;
-    padding: 12px;
-}
-
-.player-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.submitted {
-    display: none;
 }
 
 /* Animations */
