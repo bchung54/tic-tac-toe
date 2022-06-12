@@ -1,7 +1,8 @@
 # Tic Tac Toe
+
 Simple game of tic tac toe. Play against a bot or a friend with this nostalgic title.
 
-[Live Preview](https://github.com/bchung54/tic-tac-toe)
+[Live Preview](https://bchung54.github.io/tic-tac-toe/)
 
 ![title screen](./imgs/start-menu-screen.png)
 ![game screen](./imgs/game-screen.png)
@@ -27,4 +28,3 @@ Simple game of tic tac toe. Play against a bot or a friend with this nostalgic t
 [Project #9: Tic Tac Toe](https://github.com/bchung54/tic-tac-toe) [HTML | CSS | JavaScript + Factory Functions + The Module Pattern]
 
 [Project #10: Restaurant Page](https://github.com/bchung54/restaurant-page) [HTML | CSS | JavaScript + ES6 Modules + Webpack]
-
