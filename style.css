@@ -1,3 +1,10 @@
+:root {
+    --action-color: rgba(255, 34, 34, 0.822);
+    --action-color-greyed: rgba(255, 34, 34, 0.5);
+    --select-color: rgb(138, 106, 0);
+    --background-color: rgba(255, 230, 0, 0.192);
+}
+
 @font-face {
     font-family: LetterSketch;
     src: url(./fonts/Lettersketch-ow1wV.ttf);
@@ -20,7 +27,7 @@ body {
     justify-content: center;
     align-items: center;
 
-    background-color: rgba(255, 230, 0, 0.192);
+    background-color: var(--background-color);
     color: steelblue;
 
     font-family: Atari, Arial, Helvetica, sans-serif;
@@ -55,13 +62,13 @@ li {
 
 em {
     font-style: italic;
-    color: rgb(138, 106, 0);
+    color: var(--select-color);
     animation: blink 1.5s infinite;
 }
 
 .selected::marker {
     font-size: 20px;
-    color:rgb(138, 106, 0);
+    color:var(--select-color);
     content: "▶ ";
     animation: blink 1s infinite;
 }
@@ -141,7 +148,7 @@ h3 {
 input {
     height: 50px;
     width: 240px;
-    padding: 0 12px;
+    padding: 6px 0;
     border-style: hidden;
     text-align: center;
     background-color: rgba(255, 230, 0, 0);
@@ -161,14 +168,12 @@ input:hover {
 }
 
 .submit-btn {
-    background-color: rgb(255, 0, 0);
-    opacity: 0.4;
-    font-size: 16px;
+    height: 36px;
+    background-color: var(--action-color-greyed);
 }
 
 .submit-btn:hover {
     color:white;
-    opacity: 0.7;
 }
 
 button {
@@ -176,7 +181,7 @@ button {
     border-radius: 8px;
     margin: 20px;
     text-align: center;
-    background-color: rgba(255, 34, 34, 0.822);
+    background-color: var(--action-color);
     color: white;
     font-family: Atari, Arial, Helvetica, sans-serif;
     font-size: 20px;
@@ -188,6 +193,47 @@ button {
 
 .submitted {
     display: none;
+}
+
+#difficulty {
+    position: relative;
+    display: inline-block;
+    padding-top: 20px;
+}
+
+#diff-setting {
+    display: inline-block;
+    width: 150px;
+    margin: 0;
+    padding: 6px 0;
+    background-color: var(--action-color-greyed);
+    color: steelblue;
+    text-align: center;
+    border: none;
+    border-radius: 0;
+}
+
+.diff-dropdown {
+    position: absolute;
+    right: 0;
+    display: none;
+    width: 150px;
+    background-color: var(--action-color);
+    color: steelblue
+}
+
+#difficulty:hover .diff-dropdown {
+    display: block;
+    cursor: pointer;
+}
+
+.diff-option {
+    text-align: center;
+    padding: 6px;
+}
+
+.diff-option:hover {
+    color: white;
 }
 
 /* Modal */

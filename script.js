@@ -4,6 +4,8 @@ const main = document.querySelector('main');
 const startMenu = document.querySelector('.start-menu');
 const clearButton = document.getElementById('clear-btn');
 const returnButton = document.getElementById('return-btn');
+const diffSetting = document.getElementById('diff-setting');
+const diffOptions = document.querySelectorAll('.diff-option');
 const modalContent = document.querySelector('.modal-content');
 const bgModal = document.querySelector('.bg-modal');
 const modalClose = document.querySelector('.close');
@@ -66,12 +68,27 @@ const gameBoard = (function() {
         container.addEventListener('click', () => {
             if (isCellEmpty(position)) {
                 addMark(getCurrentPlayer().getSymbol(), position);
-                if (isGameOver()) {return};
+                if (isGameOver()) {
+                    if (checkWin(gameArr)) {
+                        displayController.displayModal(`${checkWin(gameArr).getName()} Wins!`);
+                    } else {
+                        displayController.displayModal("It's a Tie!");
+                    };
+                    return
+                };
+
                 if (botMode) {
                     addMark(playerBot.getSymbol(), playerBot.chooseCell());
-                    isGameOver();
-                }
-            }
+                    if (isGameOver()) {
+                        if (checkWin(gameArr)) {
+                            displayController.displayModal(`${checkWin(gameArr).getName()} Wins!`);
+                        } else {
+                            displayController.displayModal("It's a Tie!");
+                        };
+                        return;
+                    };
+                };
+            };
         });
     };
 
@@ -111,17 +128,15 @@ const gameBoard = (function() {
         let msg;
 
         if (checkWin(gameArr)) {
-            // check for winner and make appropriate message
-            msg = `${checkWin(gameArr).getName()} Wins!`;
+            // check for winner
+            return true;
         } else {
             // check if there are any empty cells
             for (let i = 0; i < gameArr.length; i++) {
                 if ('undefined' == typeof gameArr[i]) {return false};
             }
-            msg = "It's a Tie!";
+            return true;
         };
-
-        return displayController.displayModal(msg);
     };
 
     return {
@@ -221,17 +236,27 @@ const displayController = (function() {
 })();
 
 // Bot Module
-const playerBot = (() => {
+const playerBot = ((difficulty = 0) => {
     const bot = Player('BOT', 'O');
+    const setDifficulty = (newDifficulty) => {
+        difficulty = newDifficulty;
+        displayDifficulty();
+    };
+
+    const displayDifficulty = () => {
+        console.log(difficulty);
+    };
+
     const chooseRandom = () => {
         do {random = Math.floor(Math.random() * 9)}
         while(!gameBoard.isCellEmpty(random));
         return random;
     };
+
     const blockWin = () => {
         for (let i = 0; i < gameBoard.getArray().length; i++) {
-            const copy = [...gameBoard.getArray()];
             if (gameBoard.isCellEmpty(i)){
+                const copy = [...gameBoard.getArray()];
                 copy[i] = 'X';
                 if (gameBoard.checkWin(copy)) {
                     return i;
@@ -240,14 +265,38 @@ const playerBot = (() => {
         }
         return -1;
     };
+
+    const score = (gameArray) => {
+        if (gameArray.checkWin) {
+            if (gameBoard.oddTurn) {
+                return -10;
+            }
+            return 10;
+        }
+        return 0;
+    };
+
+    const minmax = (gameArray) => {
+        const copy = [...gameArray];
+        return score()
+    };
+
     const chooseCell = () => {
-        if (blockWin() == -1) {return chooseRandom()};
-        return blockWin();
+        switch (difficulty) {
+            case 0:
+                return chooseRandom();
+            case 1:
+                if (blockWin() == -1) {return chooseRandom()};
+                return blockWin();
+            case 2:
+                return minmax();
+        }
     };
 
     return {
         ...bot,
-        chooseCell
+        chooseCell,
+        setDifficulty
     }
 })();
 
@@ -258,6 +307,11 @@ clearButton.addEventListener('click', displayController.clearDisplay);
 
 // Return to start menu button event
 returnButton.addEventListener('click', displayController.returnStartMenu);
+
+// Difficulty setting
+diffOptions.forEach((option) => {
+    option.addEventListener('click', changeDifficulty)
+});
 
 // Modal close event
 modalClose.addEventListener('click', displayController.closeModal); // for X close
@@ -331,6 +385,26 @@ function onNameSubmit(e) {
     };
     e.target.elements[1].classList.add('submitted');
     return false;
+}
+
+function changeDifficulty(e) {
+    const newDifficulty = e.target.textContent;
+    if (diffSetting !== newDifficulty) {
+        switch (newDifficulty) {
+            case 'Easy':
+                playerBot.setDifficulty(0);
+                diffSetting.textContent = 'Easy';
+                break;
+            case 'Medium':
+                playerBot.setDifficulty(1);
+                diffSetting.textContent = 'Medium';
+                break;
+            case 'Hard':
+                playerBot.setDifficulty(2);
+                diffSetting.textContent = 'Hard';
+                break;
+        }
+    }
 }
 
 // Start display
