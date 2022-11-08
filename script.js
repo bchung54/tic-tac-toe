@@ -25,19 +25,57 @@ const Player = (name, symbol) => {
     }
 };
 
+const Board = (arr = new Array(9)) => {
+    const getArray = () => { return arr };
+    const isCellEmpty = (position) => { return (arr[position]? false : true) };
+    const emptyCellIndices = () => { 
+        let emptyCells = [];
+        for (let i = 0; i < arr.length; i++) {
+            if (isCellEmpty(i)) {
+                emptyCells.push(i);
+            };
+        };
+        return emptyCells;
+    };
+
+    const clearBoard = () => {arr = new Array(9)};
+
+    const addMark = (symbol, position) => {
+        if (isCellEmpty(position)) {
+            arr[position] = symbol;
+            // displayController.displayCell(position);
+            // switchTurn();
+        }
+    };
+
+    const removeMark = (position) => {
+        if (!isCellEmpty(position)) {
+            arr[position] = undefined;
+        }
+    }
+
+    return {
+        getArray,
+        isCellEmpty,
+        emptyCellIndices,
+        clearBoard,
+        addMark,
+        removeMark
+    }
+};
+
 // Modules
 //
-// Game Board Module
-const gameBoard = (function() {
+// Game Module
+const game = (function() {
 
-    // Boolean: keeps track turns
-    let oddTurn = true;
     // Boolean: keeps track of bot mode
     let botMode = true;
     // Array: keeps track of each position in tic tac toe board
-    let gameArr = new Array(9);
+    let board = Board();
     // Array: keeps track of players
     let players = new Array(2);
+    let currPlayer;
 
     const initPlayers = () => {
         if (botMode) {
@@ -45,46 +83,52 @@ const gameBoard = (function() {
         } else {
             players = new Array(Player("Player1", 'X'), Player("Player2", 'O'));
         }
+        currPlayer = players[0];
     };
 
-    const switchTurn = () => {oddTurn = !oddTurn};
-    const resetTurn = () => {oddTurn = true};
-    const getCurrentPlayer = () => {return (oddTurn ? players[0] : players[1])};
-    const setPlayerName = (name, number) => {players[number].setName(name)};
-    const toggleBotMode = () => {botMode = !botMode};
-    const getArray = () => {return gameArr};
-    const isCellEmpty = (position) => {return (gameArr[position] ? false : true)};
-    const clearBoard = () => {gameArr = new Array(9)};
-    
-    const addMark = (symbol, position) => { 
-        if (isCellEmpty(position)) {
-            gameArr[position] = symbol;
-            displayController.displayCell(position);
-            switchTurn();
+    const switchTurn = () => { 
+        if ( currPlayer == players[0]) {
+            currPlayer = players[1];
+        } else {
+            currPlayer = players[0];
         }
     };
+    const resetTurn = () => {currPlayer = players[0]};
+    const getCurrentPlayer = () => {return currPlayer};
+    const setPlayerName = (name, number) => {players[number].setName(name)};
+    const toggleBotMode = () => {botMode = !botMode};
+    const getBoard = () => {return board};
 
     const addCellEvent = (container, position) => {
         container.addEventListener('click', () => {
-            if (isCellEmpty(position)) {
-                addMark(getCurrentPlayer().getSymbol(), position);
-                if (isGameOver()) {
-                    if (checkWin(gameArr)) {
-                        displayController.displayModal(`${checkWin(gameArr).getName()} Wins!`);
+            if (board.isCellEmpty(position)) {
+                board.addMark(getCurrentPlayer().getSymbol(), position);
+                displayController.displayCell(position);
+                if (isGameOver(board)) {
+                    if (checkWin(board, players[0])) {
+                        displayController.displayModal(`${players[0].getName()} Wins!`);
+                    } else if (checkWin(board, players[1])) {
+                        displayController.displayModal(`${players[1].getName()} Wins!`);
                     } else {
                         displayController.displayModal("It's a Tie!");
                     };
                     return
                 };
+                switchTurn();
 
                 if (botMode) {
-                    addMark(playerBot.getSymbol(), playerBot.chooseCell());
-                    if (isGameOver()) {
-                        if (checkWin(gameArr)) {
-                            displayController.displayModal(`${checkWin(gameArr).getName()} Wins!`);
+                    const botChoice = playerBot.chooseCell();
+                    board.addMark(playerBot.getSymbol(), botChoice);
+                    displayController.displayCell(botChoice);
+                    switchTurn();
+                    if (isGameOver(board)) {
+                        if (checkWin(board, players[0])) {
+                            displayController.displayModal(`${players[0].getName()} Wins!`);
+                        } else if (checkWin(board, players[1])) {
+                            displayController.displayModal(`${players[1].getName()} Wins!`);
                         } else {
                             displayController.displayModal("It's a Tie!");
-                        };
+                        }
                         return;
                     };
                 };
@@ -92,57 +136,147 @@ const gameBoard = (function() {
         });
     };
 
-    const checkWin = (arr) => {
+    const checkWin = (board, player) => {
+        let arr = board.getArray();
         // check rows for win condition
         for (let row = 0; row < 3; row++) {
             let rowSet = new Set(arr.slice(row * 3, (row + 1) * 3));
             if (rowSet.size == 1 && !rowSet.has(undefined)) {
-                return (arr[row * 3] == players[0].getSymbol() ? players[0] : players[1]);
+                return arr[row * 3] == player.getSymbol();
             }
-        };
+        }
 
         // check columns for win condition
         for (let col = 0; col < 3; col++) {
             let colSet = new Set([arr[col], arr[col + 3], arr[col + 6]]);
 
             if (colSet.size == 1 && !colSet.has(undefined)) {
-                return (arr[col] == players[0].getSymbol() ? players[0] : players[1]);
+                return arr[col] == player.getSymbol();
             }
-        };
+        }
 
         // check diagonals for win condition
         let bslashSet = new Set([arr[0], arr[4], arr[8]]);
         if (bslashSet.size == 1 && !bslashSet.has(undefined)) {
-            return (arr[0] == players[0].getSymbol() ? players[0] : players[1]);
-        };
+            return arr[0] == player.getSymbol();
+        }
         let fslashSet = new Set([arr[2], arr[4], arr[6]]);
         if (fslashSet.size == 1 && !fslashSet.has(undefined)) {
-            return (arr[2] == players[0].getSymbol() ? players[0] : players[1]); 
-        };
+            return arr[2] == player.getSymbol();
+        }
 
         return false;
-
     };
 
-    const isGameOver = () => {
-        let msg;
-
-        if (checkWin(gameArr)) {
-            // check for winner
-            return true;
-        } else {
-            // check if there are any empty cells
-            for (let i = 0; i < gameArr.length; i++) {
-                if ('undefined' == typeof gameArr[i]) {return false};
+    const isGameOver = (board) => {
+        // check if any player has won
+        for (const player of players) {
+            if (checkWin(board, player)) {
+                return true;
             }
+        }
+
+        // check if there are any empty cells
+        if (board.emptyCellIndices().length == 0) {
             return true;
-        };
+        }
+        return false;
     };
+
+    const setBotDifficulty = (difficulty) => {
+        playerBot.setDifficulty(difficulty); 
+        if (difficulty == 2) {
+            board = Board([ , 'X', , 'O', , , , , ]);
+            displayController.displayBoard();
+        }
+    };
+
+    // Bot Module
+    const playerBot = ((difficulty = 0) => {
+        const bot = Player('BOT', 'O');
+        const setDifficulty = (newDifficulty) => {
+            difficulty = newDifficulty;
+        };
+
+        const chooseRandom = () => {
+            do {random = Math.floor(Math.random() * 9)}
+            while(!board.isCellEmpty(random));
+            return random;
+        };
+
+        const blockWin = () => {
+            for (const index of board.emptyCellIndices()) {
+                board.addMark(players[0].getSymbol(), index);
+                if (checkWin(board, players[0])) {
+                    board.removeMark(index);
+                    return index;
+                }
+                board.removeMark(index);
+
+            }
+            return -1;
+        };
+
+        const score = (board, player) => {
+            let opponent = player == players[0] ? players[1] : players[0];
+
+            if (checkWin(board, player)) {
+                return 10;
+            } else if (checkWin(board, opponent)) {
+                return -10;
+            }
+            return 0;
+        };
+
+        const minmax = (board, player) => {
+
+            if (isGameOver(board)) {
+                console.log(board.getArray(), `scored: ${score(board, player)}`);
+                return score(board, player);
+            }
+
+            const moves = [];
+            const copyBoardArray = [...board.getArray()];
+            for (const emptyCellIndex of board.emptyCellIndices()) {
+                let move = {};
+                move.index = emptyCellIndex;
+                copyBoardArray[emptyCellIndex] = player.getSymbol();
+
+                console.log(`player symbol added for index: ${move.index}`, copyBoardArray);
+                move.score = minmax(Board(copyBoardArray), players[1]);
+                copyBoardArray[emptyCellIndex] = undefined;
+                console.log("player symbol removed:", copyBoardArray);
+                moves.push(move);
+            }
+            console.log(moves);
+            if (player === players[1]) {
+                return moves.reduce((prev, curr) => (prev.score > curr.score) ? prev : curr, moves[0]).index;
+            }
+            return moves.reduce((prev, curr) => (prev.score < curr.score ? prev : curr), moves[0]).index;
+        };
+
+        const chooseCell = () => {
+            switch (difficulty) {
+                case 0:
+                    return chooseRandom();
+                case 1:
+                    if (blockWin() == -1) {return chooseRandom()};
+                    return blockWin();
+                case 2:
+                    return minmax(board, players[1]);
+            }
+        };
+
+        return {
+            ...bot,
+            chooseCell,
+            setDifficulty
+        }
+    })();
 
     return {
         // Array Methods
-        getArray,
-        addMark,
+        getBoard,
         
         // Player Methods
         initPlayers,
@@ -150,14 +284,11 @@ const gameBoard = (function() {
         
         // Cell Methods
         addCellEvent,
-        isCellEmpty,
 
         // Board Setting Methods
         toggleBotMode,
-        resetTurn,
-        clearBoard,
-        checkWin,
-        isGameOver,
+        setBotDifficulty,
+        resetTurn
     }
 })();
 
@@ -165,15 +296,20 @@ const gameBoard = (function() {
 const displayController = (function() {
 
     const displayCell = (position) => {
-        let box = document.getElementById(`box-${position}`);
-        box.appendChild(document.createTextNode(gameBoard.getArray()[position]));
+        if (game.getBoard().getArray()[position]) {
+            let box = document.getElementById(`box-${position}`);
+            box.textContent = game.getBoard().getArray()[position];
+        }
     };
 
     const displayBoard = () => {
         for (let i = 0; i < 9; i++) {
             let box = document.getElementById(`box-${i}`);
-            if (box.firstChild) {box.removeChild(box.firstChild)};
-            gameBoard.addCellEvent(box, i);
+            if (box.firstChild) {
+                box.removeChild(box.firstChild);
+            };
+            displayCell(i);
+            game.addCellEvent(box, i);
         };
     };
 
@@ -197,13 +333,13 @@ const displayController = (function() {
         main.style.animation = 'showMain 2s';
         main.style.transform = 'scale(1)';
         
-        gameBoard.initPlayers();
+        game.initPlayers();
         displayBoard();
     };
 
     const clearDisplay = () => {
-        gameBoard.resetTurn();
-        gameBoard.clearBoard();
+        game.resetTurn();
+        game.getBoard().clearBoard();
         displayBoard();
     };
 
@@ -232,71 +368,6 @@ const displayController = (function() {
         clearDisplay,
         returnStartMenu,
         closeModal
-    }
-})();
-
-// Bot Module
-const playerBot = ((difficulty = 0) => {
-    const bot = Player('BOT', 'O');
-    const setDifficulty = (newDifficulty) => {
-        difficulty = newDifficulty;
-        displayDifficulty();
-    };
-
-    const displayDifficulty = () => {
-        console.log(difficulty);
-    };
-
-    const chooseRandom = () => {
-        do {random = Math.floor(Math.random() * 9)}
-        while(!gameBoard.isCellEmpty(random));
-        return random;
-    };
-
-    const blockWin = () => {
-        for (let i = 0; i < gameBoard.getArray().length; i++) {
-            if (gameBoard.isCellEmpty(i)){
-                const copy = [...gameBoard.getArray()];
-                copy[i] = 'X';
-                if (gameBoard.checkWin(copy)) {
-                    return i;
-                }
-            }
-        }
-        return -1;
-    };
-
-    const score = (gameArray) => {
-        if (gameArray.checkWin) {
-            if (gameBoard.oddTurn) {
-                return -10;
-            }
-            return 10;
-        }
-        return 0;
-    };
-
-    const minmax = (gameArray) => {
-        const copy = [...gameArray];
-        return score()
-    };
-
-    const chooseCell = () => {
-        switch (difficulty) {
-            case 0:
-                return chooseRandom();
-            case 1:
-                if (blockWin() == -1) {return chooseRandom()};
-                return blockWin();
-            case 2:
-                return minmax();
-        }
-    };
-
-    return {
-        ...bot,
-        chooseCell,
-        setDifficulty
     }
 })();
 
@@ -341,14 +412,14 @@ window.addEventListener("keydown", function(event) {
             if (currSelection.textContent.includes('1')) {
                 currSelection.classList.remove('selected');
                 document.getElementById('2p').classList.add('selected');
-                gameBoard.toggleBotMode();
+                game.toggleBotMode();
             }
             break;
         case 'ArrowUp':
             if (currSelection.textContent.includes('2')) {
                 currSelection.classList.remove('selected');
                 document.getElementById('1p').classList.add('selected');
-                gameBoard.toggleBotMode();
+                game.toggleBotMode();
             }
             break;
         case 'Space':
@@ -379,9 +450,9 @@ function onNameSubmit(e) {
     let userInput = e.target.elements[0];
     (userInput.value ? userInput.placeholder = userInput.value : userInput.value = userInput.id);
     if (userInput.id == "P1") {
-        gameBoard.setPlayerName(userInput.value, 0);
+        game.setPlayerName(userInput.value, 0);
     } else {
-        gameBoard.setPlayerName(userInput.value, 1);
+        game.setPlayerName(userInput.value, 1);
     };
     e.target.elements[1].classList.add('submitted');
     return false;
@@ -392,15 +463,15 @@ function changeDifficulty(e) {
     if (diffSetting !== newDifficulty) {
         switch (newDifficulty) {
             case 'Easy':
-                playerBot.setDifficulty(0);
+                game.setBotDifficulty(0);
                 diffSetting.textContent = 'Easy';
                 break;
             case 'Medium':
-                playerBot.setDifficulty(1);
+                game.setBotDifficulty(1);
                 diffSetting.textContent = 'Medium';
                 break;
             case 'Hard':
-                playerBot.setDifficulty(2);
+                game.setBotDifficulty(2);
                 diffSetting.textContent = 'Hard';
                 break;
         }
