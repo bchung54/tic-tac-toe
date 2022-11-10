@@ -184,11 +184,7 @@ const game = (function() {
     };
 
     const setBotDifficulty = (difficulty) => {
-        playerBot.setDifficulty(difficulty); 
-        if (difficulty == 2) {
-            board = Board([ , 'X', , 'O', , , , , ]);
-            displayController.displayBoard();
-        }
+        playerBot.setDifficulty(difficulty);
     };
 
     // Bot Module
@@ -217,42 +213,40 @@ const game = (function() {
             return -1;
         };
 
-        const score = (board, player) => {
-            let opponent = player == players[0] ? players[1] : players[0];
+        const score = (board, depth) => {
 
-            if (checkWin(board, player)) {
-                return 10;
-            } else if (checkWin(board, opponent)) {
-                return -10;
+            if (checkWin(board, players[1])) {
+                return 10 - depth;
+            } else if (checkWin(board, players[0])) {
+                return depth - 10;
             }
             return 0;
         };
 
-        const minmax = (board, player) => {
-
-            if (isGameOver(board)) {
-                console.log(board.getArray(), `scored: ${score(board, player)}`);
-                return score(board, player);
-            }
-
+        const minmax = (board, player, depth) => {
             const moves = [];
             const copyBoardArray = [...board.getArray()];
             for (const emptyCellIndex of board.emptyCellIndices()) {
                 let move = {};
                 move.index = emptyCellIndex;
+                
                 copyBoardArray[emptyCellIndex] = player.getSymbol();
-
-                console.log(`player symbol added for index: ${move.index}`, copyBoardArray);
-                move.score = minmax(Board(copyBoardArray), players[1]);
+                const copyBoard = Board(copyBoardArray);
+                
+                if (isGameOver(copyBoard)) {
+                    move.score = score(copyBoard, depth);
+                } else {
+                    const opponent = players.filter((element) => element !== player)[0];
+                    move.score = minmax(Board(copyBoardArray), opponent, depth + 1).score;
+                }
+                
                 copyBoardArray[emptyCellIndex] = undefined;
-                console.log("player symbol removed:", copyBoardArray);
                 moves.push(move);
             }
-            console.log(moves);
-            if (player === players[1]) {
-                return moves.reduce((prev, curr) => (prev.score > curr.score) ? prev : curr, moves[0]).index;
+            if (player.getName() == 'BOT') {
+                return moves.reduce((prev, curr) => (prev.score > curr.score) ? prev : curr);
             }
-            return moves.reduce((prev, curr) => (prev.score < curr.score ? prev : curr), moves[0]).index;
+            return moves.reduce((prev, curr) => (prev.score < curr.score) ? prev : curr);
         };
 
         const chooseCell = () => {
@@ -263,7 +257,7 @@ const game = (function() {
                     if (blockWin() == -1) {return chooseRandom()};
                     return blockWin();
                 case 2:
-                    return minmax(board, players[1]);
+                    return minmax(board, players[1], 0).index;
             }
         };
 
