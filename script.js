@@ -4,6 +4,10 @@ const main = document.querySelector('main');
 const startMenu = document.querySelector('.start-menu');
 const clearButton = document.getElementById('clear-btn');
 const returnButton = document.getElementById('return-btn');
+const submitButtons = document.querySelectorAll('.submit-btn');
+const nameInputP1 = document.getElementById('P1');
+const nameInputP2 = document.getElementById('P2');
+const diffContainer = document.getElementById('difficulty');
 const diffSetting = document.getElementById('diff-setting');
 const diffOptions = document.querySelectorAll('.diff-option');
 const modalContent = document.querySelector('.modal-content');
@@ -29,6 +33,7 @@ const Board = (arr = new Array(9)) => {
     const getArray = () => { return arr };
     const isCellEmpty = (position) => { return (arr[position]? false : true) };
     const emptyCellIndices = () => { 
+        // Array of empty cells on the board
         let emptyCells = [];
         for (let i = 0; i < arr.length; i++) {
             if (isCellEmpty(i)) {
@@ -39,20 +44,16 @@ const Board = (arr = new Array(9)) => {
     };
 
     const clearBoard = () => {arr = new Array(9)};
-
     const addMark = (symbol, position) => {
         if (isCellEmpty(position)) {
             arr[position] = symbol;
-            // displayController.displayCell(position);
-            // switchTurn();
         }
     };
-
     const removeMark = (position) => {
         if (!isCellEmpty(position)) {
             arr[position] = undefined;
         }
-    }
+    };
 
     return {
         getArray,
@@ -69,15 +70,13 @@ const Board = (arr = new Array(9)) => {
 // Game Module
 const game = (function() {
 
-    // Boolean: keeps track of bot mode
     let botMode = true;
-    // Array: keeps track of each position in tic tac toe board
     let board = Board();
-    // Array: keeps track of players
     let players = new Array(2);
     let currPlayer;
 
     const initPlayers = () => {
+        clearNames();
         if (botMode) {
             players = new Array(Player("Player1", 'X'), playerBot);
         } else {
@@ -86,54 +85,54 @@ const game = (function() {
         currPlayer = players[0];
     };
 
-    const switchTurn = () => { 
-        if ( currPlayer == players[0]) {
-            currPlayer = players[1];
-        } else {
-            currPlayer = players[0];
-        }
+    const setPlayerName = (name, number) => { players[number].setName(name) };
+    const setBotDifficulty = (difficulty) => { playerBot.setDifficulty(difficulty) };
+    const getBoard = () => { return board };
+    const switchTurn = () => { currPlayer = (currPlayer == players[0]) ? players[1] : players[0] };
+    const resetTurn = () => { currPlayer = players[0] };
+    const toggleBotMode = () => { botMode = !botMode };
+
+    const clearNames = () => {
+        nameInputP1.value = '';
+		nameInputP1.placeholder = 'Enter Name';
+        nameInputP2.value = '';
+        nameInputP2.placeholder = 'Enter Name';
+        submitButtons.forEach((button) => { button.classList.remove('submitted') });
     };
-    const resetTurn = () => {currPlayer = players[0]};
-    const getCurrentPlayer = () => {return currPlayer};
-    const setPlayerName = (name, number) => {players[number].setName(name)};
-    const toggleBotMode = () => {botMode = !botMode};
-    const getBoard = () => {return board};
 
-    const addCellEvent = (container, position) => {
-        container.addEventListener('click', () => {
-            if (board.isCellEmpty(position)) {
-                board.addMark(getCurrentPlayer().getSymbol(), position);
-                displayController.displayCell(position);
+    const reset = () => {
+        board.clearBoard();
+        resetTurn();
+    };
+
+    const addCellEvent = (container) => {
+        container.addEventListener('click', onCellClick);
+    };
+
+    function onCellClick() {
+        const position = parseInt(this.id.slice(-1));
+        if (board.isCellEmpty(position)) {
+            takeTurn(currPlayer, position);
+            if (isGameOver(board)) {
+                return endGame();
+            }
+            switchTurn();
+
+            // Bot takes turn
+            if (botMode) {
+                const botChoice = playerBot.chooseCell();
+                takeTurn(playerBot, botChoice);
                 if (isGameOver(board)) {
-                    if (checkWin(board, players[0])) {
-                        displayController.displayModal(`${players[0].getName()} Wins!`);
-                    } else if (checkWin(board, players[1])) {
-                        displayController.displayModal(`${players[1].getName()} Wins!`);
-                    } else {
-                        displayController.displayModal("It's a Tie!");
-                    };
-                    return
-                };
+                    return endGame();
+                }
                 switchTurn();
-
-                if (botMode) {
-                    const botChoice = playerBot.chooseCell();
-                    board.addMark(playerBot.getSymbol(), botChoice);
-                    displayController.displayCell(botChoice);
-                    switchTurn();
-                    if (isGameOver(board)) {
-                        if (checkWin(board, players[0])) {
-                            displayController.displayModal(`${players[0].getName()} Wins!`);
-                        } else if (checkWin(board, players[1])) {
-                            displayController.displayModal(`${players[1].getName()} Wins!`);
-                        } else {
-                            displayController.displayModal("It's a Tie!");
-                        }
-                        return;
-                    };
-                };
             };
-        });
+        };
+    };
+
+    const takeTurn = (player, position) => {
+        board.addMark(player.getSymbol(), position);
+        displayController.displayCell(position);
     };
 
     const checkWin = (board, player) => {
@@ -149,7 +148,6 @@ const game = (function() {
         // check columns for win condition
         for (let col = 0; col < 3; col++) {
             let colSet = new Set([arr[col], arr[col + 3], arr[col + 6]]);
-
             if (colSet.size == 1 && !colSet.has(undefined)) {
                 return arr[col] == player.getSymbol();
             }
@@ -174,17 +172,23 @@ const game = (function() {
             if (checkWin(board, player)) {
                 return true;
             }
-        }
+        };
 
         // check if there are any empty cells
         if (board.emptyCellIndices().length == 0) {
             return true;
-        }
+        };
+
         return false;
     };
 
-    const setBotDifficulty = (difficulty) => {
-        playerBot.setDifficulty(difficulty);
+    const endGame = () => {
+        if (checkWin(board, currPlayer)) {
+            displayController.displayModal(`${currPlayer.getName()} Wins!`);
+        } else {
+            displayController.displayModal("It's a Tie!");
+        }
+        return;
     };
 
     // Bot Module
@@ -243,7 +247,7 @@ const game = (function() {
                 copyBoardArray[emptyCellIndex] = undefined;
                 moves.push(move);
             }
-            if (player.getName() == 'BOT') {
+            if (player === playerBot) {
                 return moves.reduce((prev, curr) => (prev.score > curr.score) ? prev : curr);
             }
             return moves.reduce((prev, curr) => (prev.score < curr.score) ? prev : curr);
@@ -282,7 +286,7 @@ const game = (function() {
         // Board Setting Methods
         toggleBotMode,
         setBotDifficulty,
-        resetTurn
+        reset
     }
 })();
 
@@ -303,7 +307,7 @@ const displayController = (function() {
                 box.removeChild(box.firstChild);
             };
             displayCell(i);
-            game.addCellEvent(box, i);
+            game.addCellEvent(box);
         };
     };
 
@@ -328,12 +332,12 @@ const displayController = (function() {
         main.style.transform = 'scale(1)';
         
         game.initPlayers();
+        game.reset();
         displayBoard();
     };
 
     const clearDisplay = () => {
-        game.resetTurn();
-        game.getBoard().clearBoard();
+        game.reset();
         displayBoard();
     };
 
@@ -418,9 +422,11 @@ window.addEventListener("keydown", function(event) {
             break;
         case 'Space':
             if (currSelection.textContent.includes('1')) {
+                diffContainer.style.display = 'inline-block';
                 p2FormTitle.textContent = "BOT";
                 p2Form.style.display = 'none';
             } else {
+                diffContainer.style.display = 'none';
                 p2FormTitle.textContent = "PLAYER 2";
                 p2Form.style.display = 'flex';
             }
@@ -450,7 +456,7 @@ function onNameSubmit(e) {
     };
     e.target.elements[1].classList.add('submitted');
     return false;
-}
+};
 
 function changeDifficulty(e) {
     const newDifficulty = e.target.textContent;
@@ -470,8 +476,7 @@ function changeDifficulty(e) {
                 break;
         }
     }
-}
+};
 
 // Start display
 displayController.displayBoard();
-
